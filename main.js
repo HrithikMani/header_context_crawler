@@ -93,3 +93,5 @@ function getElementAttributes(element) {
 
 console.log('✅ captureXPathHierarchy function loaded!');
 console.log('Example: captureXPathHierarchy(element, ["//h1", "//h2", "//h3"])');
+
+

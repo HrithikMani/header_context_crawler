@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Medical Records - Header Context Crawler Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 0;
+        }
+        
+        .top-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            margin-left: auto;
+        }
+        
+        .patient-header {
+            background: #e74c3c;
+            color: white;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .patient-header span {
+            margin-right: 30px;
+        }
+        
+        .badge {
+            background: white;
+            color: #e74c3c;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .tabs {
+            background: #ecf0f1;
+            padding: 10px 20px;
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        
+        .tab {
+            padding: 8px 20px;
+            background: white;
+            border: 1px solid #bdc3c7;
+            cursor: pointer;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            min-height: calc(100vh - 120px);
+        }
+        
+        .content-area {
+            display: flex;
+            height: calc(100vh - 150px);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar {
+            width: 450px;
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background: #fafafa;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .section.crawling {
+            background: #fff3cd;
+            border-color: #ffc107;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+        
+        .section.crawled {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        
+        h1.crawling {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            animation: highlight 0.5s ease;
+        }
+        
+        h1.crawled {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        h2.crawling {
+            border-bottom-color: #ffc107;
+            animation: highlight 0.5s ease;
+        }
+        
+        h2.crawled {
+            border-bottom-color: #28a745;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-left: 3px solid #6c757d;
+        }
+        
+        h3.crawling {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            animation: highlight 0.5s ease;
+        }
+        
+        h3.crawled {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        @keyframes highlight {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .metadata {
+            background: #e8f4f8;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .metadata span {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .metadata.crawling {
+            background: #fff3cd;
+            animation: highlight 0.5s ease;
+        }
+        
+        .metadata.crawled {
+            background: #d4edda;
+        }
+        
+        .problem-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .problem-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .problem-list li:hover {
+            border-color: #3498db;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+        
+        .problem-list li.crawling {
+            background: #ffc107;
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        .config-section {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .config-section h3 {
+            color: #ecf0f1;
+            font-size: 14px;
+            margin-bottom: 10px;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+        
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #7f8c8d;
+            border-radius: 4px;
+            background: #2c3e50;
+            color: white;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #34495e;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            font-size: 12px;
+        }
+        
+        .tag-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .crawl-button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .crawl-button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+        
+        .crawl-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-title {
+            color: #ecf0f1;
+            font-size: 16px;
+            margin: 20px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #27ae60;
+        }
+        
+        .result-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 4px;
+            border-left: 3px solid #27ae60;
+            font-size: 12px;
+            opacity: 0;
+            animation: slideIn 0.3s ease forwards;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #f39c12;
+            transform: translateX(5px);
+        }
+        
+        .element-highlight {
+            background: #ffd700 !important;
+            border-color: #f39c12 !important;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+            transform: scale(1.03) !important;
+            transition: all 0.3s ease !important;
+            z-index: 1000;
+            position: relative;
+        }
+        
+        .start-element-marker {
+            background: #ff6b6b !important;
+            border: 3px solid #c0392b !important;
+            box-shadow: 0 0 25px rgba(231, 76, 60, 0.7) !important;
+            position: relative;
+            animation: startPulse 2s ease-in-out infinite;
+        }
+        
+        .start-element-marker::before {
+            content: "START ELEMENT";
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 1001;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes startPulse {
+            0%, 100% { 
+                box-shadow: 0 0 25px rgba(231, 76, 60, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 35px rgba(231, 76, 60, 0.9);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .result-tag {
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .result-text {
+            color: #ecf0f1;
+        }
+        
+        .crawl-stats {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .crawl-stats div {
+            margin: 4px 0;
+        }
+        
+        .help-text {
+            font-size: 11px;
+            color: #95a5a6;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .preset-btn {
+            flex: 1;
+            padding: 6px;
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        .preset-btn:hover {
+            background: #95a5a6;
+        }
+        
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <span>MediCare EMR</span>
+        <span>Orders</span>
+        <span>Doc Queue (3)</span>
+        <span class="user-info">Dr. Smith, John - System Owner | US/Eastern</span>
+    </div>
+    
+    <div class="patient-header">
+        <span>HART, WILLIAM S.</span>
+        <span>70 y/o M</span>
+        <span class="badge">DUPLICATE</span>
+        <span>Status: Active</span>
+        <span style="background: #c0392b; padding: 3px 10px; border-radius: 3px;">Tasks: 3</span>
+        <span style="background: #c0392b; padding: 3px 10px; border-radius: 3px;">Open Enc: 4</span>
+        <span style="float: right;">TEST-10019</span>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab">Visit</div>
+        <div class="tab active">Chart Review</div>
+        <div class="tab">Orders</div>
+        <div class="tab">Results</div>
+        <div class="tab">Medications</div>
+    </div>
+    
+    <div class="container">
+        <div class="content-area">
+            <div class="main-content">
+                <h1>Patient Medical Record</h1>
+                
+                <div class="metadata">
+                    <span>Patient ID:</span> TEST-10019
+                    <span>DOB:</span> 11-30-1954
+                    <span>Age:</span> 70
+                    <span>Last Updated:</span> 10-01-2025
+                </div>
+                
+                <div class="section">
+                    <h2>Demographics & Insurance</h2>
+                    <div class="metadata">
+                        <span>Primary Insurance:</span> Better Corp.
+                        <span>Policy:</span> BC-445521
+                        <span>Effective:</span> 01-01-2020
+                    </div>
+                    <p><strong>Address:</strong> 123 Main Street, Fort Wayne, IN 46802</p>
+                    <p><strong>Phone:</strong> (260) 555-0123</p>
+                    <p><strong>Emergency Contact:</strong> Jane Hart (Spouse) - (260) 555-0124</p>
+                </div>
+                
+                <div class="section">
+                    <h2>Active Medical Conditions</h2>
+                    
+                    <h3>Cardiovascular</h3>
+                    <div class="metadata">
+                        <span>Last Review:</span> 09-15-2025
+                        <span>Provider:</span> Dr. Johnson, Sarah
+                    </div>
+                    <ul class="problem-list">
+                        <li id="problem1">Atrial fibrillation (I48.91) - Diagnosed 03-2023</li>
+                        <li id="targetProblem">CHF - Congestive heart failure (I50.814) - Diagnosed 01-2022</li>
+                        <li id="problem3">Hypertension, essential (I10) - Diagnosed 2015</li>
+                    </ul>
+                    
+                    <h3>Musculoskeletal</h3>
+                    <div class="metadata">
+                        <span>Last Review:</span> 08-20-2025
+                        <span>Provider:</span> Dr. Martinez, Carlos
+                    </div>
+                    <ul class="problem-list">
+                        <li id="problem4">Contusion of left knee, initial encounter (S80.02xA)</li>
+                        <li id="problem5">Osteoarthritis of bilateral knees (M17.0)</li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>Treatment Plan & Goals</h2>
+                    
+                    <h3>Exercise Goals</h3>
+                    <div class="metadata">
+                        <span>Plan Created:</span> 03-01-2023
+                        <span>Target Date:</span> 03-01-2024
+                        <span>Status:</span> In Progress
+                    </div>
+                    <ul>
+                        <li><strong>Cardio exercise participation:</strong> Treadmill 1x per week for 30 min by 03-01-2023</li>
+                        <li><strong>Walking exercise participation:</strong> Walking outdoors 3x per week for 20 min by 03-15-2023</li>
+                    </ul>
+                    
+                    <h3>Medication Management</h3>
+                    <div class="metadata">
+                        <span>Last Reconciliation:</span> 10-01-2025
+                        <span>Next Review:</span> 01-01-2026
+                    </div>
+                    <ul>
+                        <li>Metoprolol 50mg - 1 tablet twice daily</li>
+                        <li>Warfarin 5mg - 1 tablet daily (INR monitoring required)</li>
+                        <li>Lisinopril 10mg - 1 tablet daily</li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>Recent Encounters</h2>
+                    <div class="metadata">
+                        <span>Total Visits YTD:</span> 12
+                        <span>Last Visit:</span> 10-01-2025
+                    </div>
+                    <ul>
+                        <li><strong>10-01-2025:</strong> Follow-up for CHF management</li>
+                        <li><strong>09-15-2025:</strong> Cardiology consultation</li>
+                        <li><strong>08-20-2025:</strong> Orthopedic evaluation - left knee</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="config-section">
+                    <h3>Crawler Configuration</h3>
+                    
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="loadPreset('default')">Default</button>
+                        <button class="preset-btn" onclick="loadPreset('headers')">Headers Only</button>
+                        <button class="preset-btn" onclick="loadPreset('all')">All Elements</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Start Element (XPath or CSS Selector):</label>
+                        <input type="text" id="startXPath" value="//*[@id='targetProblem']" placeholder="//*[@id='myElement'] or #myElement">
+                        <div class="help-text">XPath: //*[@id='...'] or CSS: #id or .class</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Capture List (XPath selectors, one per line):</label>
+                        <textarea id="captureList">//h1
+//h2
+//h3
+//span</textarea>
+                        <div class="help-text">Elements to capture while crawling upward</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Filter by Tags (optional, comma-separated):</label>
+                        <input type="text" id="filterTags" placeholder="H1,H2,H3 (leave empty for all)">
+                        <div class="help-text">Filter results after crawling (e.g., H1,H2)</div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="debugMode" checked>
+                        <label>Enable Debug Mode (console logs)</label>
+                    </div>
+                </div>
+                
+                <button class="crawl-button" onclick="startVisualCrawl()" id="crawlBtn">
+                    Start Visual Crawl
+                </button>
+                
+                <div id="errorContainer"></div>
+                
+                <div class="crawl-stats" id="stats" style="display: none;">
+                    <div><strong>Crawl Statistics</strong></div>
+                    <div>Elements Found: <span id="elemCount">0</span></div>
+                    <div>After Filter: <span id="filteredCount">0</span></div>
+                    <div>Current Level: <span id="currentLevel">0</span></div>
+                    <div>Status: <span id="crawlStatus">Ready</span></div>
+                </div>
+                
+                <h2 class="results-title">Captured Context (Bottom → Top)</h2>
+                <div id="resultsList">
+                    <p style="color: #95a5a6; font-style: italic; font-size: 12px;">Configure parameters above and click "Start Visual Crawl"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import HeaderContextCrawler from external file -->
+    <script src="header-context-crawler.js"></script>
+
+    <script>
+        // Extend the crawl method to support async progress callback for visual effects
+        const originalCrawl = HeaderContextCrawler.prototype.crawl;
+        HeaderContextCrawler.prototype.crawlWithProgress = async function(onProgress) {
+            if (!this.startElement) {
+                console.error("Start element not found");
+                return [];
+            }
+
+            this._log("Starting crawl from element:", this.startElement);
+            this._log("Capture list:", this.captureList);
+
+            const capturedElements = [];
+            let currentNode = this.startElement.parentElement;
+            let level = 0;
+
+            while (currentNode && currentNode.tagName !== 'HTML') {
+                this._log(`Level ${level}: Checking ${currentNode.tagName}`);
+                
+                if (onProgress) await onProgress(currentNode, level);
+                
+                let sibling = currentNode.previousElementSibling;
+                while (sibling) {
+                    const siblingMatches = [];
+                    
+                    if (this._matchesCaptureList(sibling)) {
+                        siblingMatches.push(sibling);
+                        this._log(`  Found matching sibling: ${sibling.tagName}`);
+                    }
+                    
+                    this.captureList.forEach(selector => {
+                        const tagName = selector.replace('//', '').toLowerCase();
+                        const matches = sibling.querySelectorAll(tagName);
+                        if (matches.length > 0) {
+                            this._log(`  Found ${matches.length} ${tagName} in descendants`);
+                            matches.forEach(match => siblingMatches.push(match));
+                        }
+                    });
+                    
+                    this._sortByDocumentOrder(siblingMatches);
+                    capturedElements.unshift(...siblingMatches);
+                    
+                    if (onProgress && siblingMatches.length > 0) {
+                        for (const match of siblingMatches) {
+                            await onProgress(match, level, true);
+                        }
+                    }
+                    
+                    sibling = sibling.previousElementSibling;
+                }
+                
+                currentNode = currentNode.parentElement;
+                level++;
+            }
+
+            this.capturedElements = this._removeDuplicates(capturedElements);
+            this._log(`Total unique elements found: ${this.capturedElements.length}`);
+            
+            return this.capturedElements;
+        };
+
+        // Preset configurations
+        function loadPreset(presetName) {
+            const presets = {
+                default: {
+                    xpath: '//*[@id="targetProblem"]',
+                    captures: '//h1\n//h2\n//h3\n//span',
+                    filter: ''
+                },
+                headers: {
+                    xpath: '//*[@id="targetProblem"]',
+                    captures: '//h1\n//h2\n//h3',
+                    filter: 'H1,H2,H3'
+                },
+                all: {
+                    xpath: '//*[@id="targetProblem"]',
+                    captures: '//h1\n//h2\n//h3\n//h4\n//span\n//p\n//div',
+                    filter: ''
+                }
+            };
+            
+            const preset = presets[presetName];
+            if (preset) {
+                document.getElementById('startXPath').value = preset.xpath;
+                document.getElementById('captureList').value = preset.captures;
+                document.getElementById('filterTags').value = preset.filter;
+            }
+        }
+
+        async function startVisualCrawl() {
+            const btn = document.getElementById('crawlBtn');
+            const resultsList = document.getElementById('resultsList');
+            const stats = document.getElementById('stats');
+            const errorContainer = document.getElementById('errorContainer');
+            
+            // Clear previous errors
+            errorContainer.innerHTML = '';
+            
+            // Get configuration
+            const startXPath = document.getElementById('startXPath').value.trim();
+            const captureListText = document.getElementById('captureList').value.trim();
+            const filterTagsText = document.getElementById('filterTags').value.trim();
+            const debugMode = document.getElementById('debugMode').checked;
+            
+            // Validate inputs
+            if (!startXPath) {
+                errorContainer.innerHTML = '<div class="error-message">Please enter a start element XPath or selector</div>';
+                return;
+            }
+            
+            if (!captureListText) {
+                errorContainer.innerHTML = '<div class="error-message">Please enter at least one capture selector</div>';
+                return;
+            }
+            
+            // Parse capture list
+            const captureList = captureListText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            
+            // Parse filter tags
+            const filterTags = filterTagsText ? filterTagsText.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0) : [];
+            
+            btn.disabled = true;
+            btn.textContent = 'Crawling in progress...';
+            resultsList.innerHTML = '';
+            stats.style.display = 'block';
+            
+            // Reset all styles
+            document.querySelectorAll('.crawling, .crawled').forEach(el => {
+                el.classList.remove('crawling', 'crawled');
+            });
+            
+            // Remove previous start element marker
+            document.querySelectorAll('.start-element-marker').forEach(el => {
+                el.classList.remove('start-element-marker');
+            });
+            
+            try {
+                const crawler = new HeaderContextCrawler(
+                    startXPath,
+                    captureList,
+                    { debug: debugMode }
+                );
+                
+                // Mark the start element with red background
+                if (crawler.startElement) {
+                    crawler.startElement.classList.add('start-element-marker');
+                    crawler.startElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                } else {
+                    throw new Error('Start element not found. Please check your XPath or selector.');
+                }
+
+                let capturedCount = 0;
+                
+                const elements = await crawler.crawlWithProgress(async (element, level, isCapture) => {
+                    document.getElementById('currentLevel').textContent = level;
+                    document.getElementById('crawlStatus').textContent = 'Crawling...';
+                    
+                    if (isCapture) {
+                        capturedCount++;
+                        document.getElementById('elemCount').textContent = capturedCount;
+                        
+                        // Visual feedback
+                        element.classList.add('crawling');
+                        
+                        // Wait for animation
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                        element.classList.remove('crawling');
+                        element.classList.add('crawled');
+                    }
+                });
+
+                // Apply filter if specified
+                let finalElements = elements;
+                if (filterTags.length > 0) {
+                    finalElements = crawler.filterByTags(filterTags);
+                    document.getElementById('filteredCount').textContent = finalElements.length;
+                } else {
+                    document.getElementById('filteredCount').textContent = 'N/A';
+                }
+
+                // Display results
+                finalElements.forEach((el, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.style.animationDelay = `${index * 0.05}s`;
+                    
+                    // Store reference to the actual element
+                    div.dataset.elementIndex = index;
+                    
+                    const text = el.textContent.trim().substring(0, 60);
+                    div.innerHTML = `
+                        <span class="result-tag">${index + 1}. &lt;${el.tagName}&gt;</span>
+                        <span class="result-text">${text}${text.length === 60 ? '...' : ''}</span>
+                    `;
+                    
+                    // Add hover event listeners
+                    div.addEventListener('mouseenter', () => {
+                        el.classList.add('element-highlight');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    
+                    div.addEventListener('mouseleave', () => {
+                        el.classList.remove('element-highlight');
+                    });
+                    
+                    resultsList.appendChild(div);
+                });
+
+                document.getElementById('crawlStatus').textContent = 'Complete!';
+                btn.disabled = false;
+                btn.textContent = 'Crawl Complete - Click to Run Again';
+                
+                // Console output
+                console.log('=== Crawl Complete ===');
+                console.log(`Total elements captured: ${elements.length}`);
+                if (filterTags.length > 0) {
+                    console.log(`After filtering by [${filterTags.join(', ')}]: ${finalElements.length}`);
+                }
+                console.log('\n=== Elements List ===');
+                finalElements.forEach((el, i) => {
+                    console.log(`${i + 1}. <${el.tagName}> ${el.textContent.trim().substring(0, 50)}`);
+                });
+                
+            } catch (error) {
+                errorContainer.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+                console.error('Crawl error:', error);
+                btn.disabled = false;
+                btn.textContent = 'Start Visual Crawl';
+                document.getElementById('crawlStatus').textContent = 'Error';
+            }
+        }
+
+        // Initialize with default preset
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPreset('default');
+        });
+    </script>
+</body>
+</html>
