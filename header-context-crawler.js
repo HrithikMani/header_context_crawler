@@ -8,6 +8,7 @@
  *     ["//h1", "//h2", "//span"]
  * );
  * const elements = crawler.crawl();
+ * const texts = crawler.getElementTexts();
  * 
  * @example
  * // Using DOM element
@@ -18,6 +19,7 @@
  *     { debug: true }
  * );
  * const elements = crawler.crawl();
+ * const texts = crawler.getElementTexts();
  */
 class HeaderContextCrawler {
     /**
@@ -175,6 +177,38 @@ class HeaderContextCrawler {
         
         this.capturedElements = uniqueElements;
         return uniqueElements;
+    }
+
+    /**
+     * Get text content from all captured elements with start element context
+     * @param {Object} options - Optional configuration
+     * @param {boolean} options.trim - Trim whitespace from text (default: true)
+     * @param {boolean} options.skipEmpty - Skip elements with empty text (default: false)
+     * @returns {Object} Object with text (start element text) and stack (array of captured element texts)
+     */
+    getContextStack(options = {}) {
+        const trim = options.trim !== false;
+        const skipEmpty = options.skipEmpty || false;
+        
+        // Get start element text
+        const startText = this.startElement 
+            ? (trim ? this.startElement.textContent.trim() : this.startElement.textContent)
+            : '';
+        
+        // Get captured elements text
+        let texts = this.capturedElements.map(el => {
+            const text = el.textContent;
+            return trim ? text.trim() : text;
+        });
+        
+        if (skipEmpty) {
+            texts = texts.filter(text => text.length > 0);
+        }
+        
+        return {
+            text: startText,
+            stack: texts.reverse() // Reverse to get top-to-bottom order
+        };
     }
 
     /**
