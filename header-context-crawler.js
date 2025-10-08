@@ -88,13 +88,62 @@ Do not include any explanation, markdown formatting, or additional text outside 
     }
 
     /**
-     * Check if element matches any selector in capture list
+     * Get descendants matching an XPath selector relative to a context node
+     * @private
+     */
+    _getDescendantsByXPath(contextNode, xpath) {
+        const results = [];
+        
+        // Make XPath relative to the context node by prefixing with '.'
+        // Also handle both './/tag' and '//tag' formats
+        const relativeXPath = xpath.startsWith('//') ? '.' + xpath : xpath;
+        
+        try {
+            const xpathResult = document.evaluate(
+                relativeXPath,
+                contextNode,
+                null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+            );
+            
+            for (let i = 0; i < xpathResult.snapshotLength; i++) {
+                results.push(xpathResult.snapshotItem(i));
+            }
+        } catch (error) {
+            this._log(`XPath evaluation error for "${xpath}":`, error);
+        }
+        
+        return results;
+    }
+
+    /**
+     * Check if element matches any XPath selector in capture list
      * @private
      */
     _matchesCaptureList(element) {
-        return this.captureList.some(selector => {
-            const tagName = selector.replace('//', '').toUpperCase();
-            return element.tagName === tagName;
+        return this.captureList.some(xpath => {
+            try {
+                // Evaluate XPath from document root to see if this element matches
+                const result = document.evaluate(
+                    xpath,
+                    document,
+                    null,
+                    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                    null
+                );
+                
+                // Check if element is in the result set
+                for (let i = 0; i < result.snapshotLength; i++) {
+                    if (result.snapshotItem(i) === element) {
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                this._log(`XPath matching error for "${xpath}":`, error);
+                return false;
+            }
         });
     }
 
@@ -172,12 +221,11 @@ Do not include any explanation, markdown formatting, or additional text outside 
                     this._log(`  Found matching sibling: ${sibling.tagName}`);
                 }
                 
-                // Check all descendants of sibling for matches
-                this.captureList.forEach(selector => {
-                    const tagName = selector.replace('//', '').toLowerCase();
-                    const matches = sibling.querySelectorAll(tagName);
+                // Check all descendants of sibling for matches using XPath
+                this.captureList.forEach(xpath => {
+                    const matches = this._getDescendantsByXPath(sibling, xpath);
                     if (matches.length > 0) {
-                        this._log(`  Found ${matches.length} ${tagName} in descendants`);
+                        this._log(`  Found ${matches.length} matches for ${xpath} in descendants`);
                         matches.forEach(match => siblingMatches.push(match));
                     }
                 });
@@ -332,57 +380,57 @@ Do not include any explanation, markdown formatting, or additional text outside 
         return this.translationSystemPrompt;
     }
 
-/**
- * Translate the captured context text to a target language using Claude AI
- * @param {string} language - Target language (e.g., "Spanish", "French", "German", "es", "fr", "de")
- * @param {Object} options - Optional configuration
- * @param {string} options.apiKey - Anthropic API key (required)
- * @param {string} options.model - Model to use (default: "claude-sonnet-4-5-20250929")
- * @param {number} options.maxTokens - Max tokens for response (default: 2000)
- * @param {number} options.temperature - Temperature for response (default: 0.3 for consistency)
- * @param {string} options.systemPrompt - Custom system prompt (overrides instance prompt for this call only)
- * @param {string} options.proxyUrl - Proxy server URL (default: "http://localhost:3000/api/translate")
- * @returns {Promise<Object>} Object with {translation: string, language: string}
- * @throws {Error} If API call fails or API key is missing
- * 
- * @example
- * const crawler = new HeaderContextCrawler('#myElement', ['//h1', '//h2']);
- * crawler.crawl();
- * const result = await crawler.getTranslation('Spanish', { apiKey: 'your-api-key' });
- * console.log(result.translation); // "Empleador:"
- */
-async getTranslation(language, options = {}) {
-    // Validate API key
-    if (!options.apiKey) {
-        throw new Error('API key is required. Pass it in options.apiKey parameter.');
-    }
+    /**
+     * Translate the captured context text to a target language using Claude AI
+     * @param {string} language - Target language (e.g., "Spanish", "French", "German", "es", "fr", "de")
+     * @param {Object} options - Optional configuration
+     * @param {string} options.apiKey - Anthropic API key (required)
+     * @param {string} options.model - Model to use (default: "claude-sonnet-4-5-20250929")
+     * @param {number} options.maxTokens - Max tokens for response (default: 2000)
+     * @param {number} options.temperature - Temperature for response (default: 0.3 for consistency)
+     * @param {string} options.systemPrompt - Custom system prompt (overrides instance prompt for this call only)
+     * @param {string} options.proxyUrl - Proxy server URL (default: "http://localhost:3000/api/translate")
+     * @returns {Promise<Object>} Object with {translation: string, language: string}
+     * @throws {Error} If API call fails or API key is missing
+     * 
+     * @example
+     * const crawler = new HeaderContextCrawler('#myElement', ['//h1', '//h2']);
+     * crawler.crawl();
+     * const result = await crawler.getTranslation('Spanish', { apiKey: 'your-api-key' });
+     * console.log(result.translation); // "Empleador:"
+     */
+    async getTranslation(language, options = {}) {
+        // Validate API key
+        if (!options.apiKey) {
+            throw new Error('API key is required. Pass it in options.apiKey parameter.');
+        }
 
-    // Get context stack
-    const contextData = this.getContextStack({ trim: true, skipEmpty: true });
-    
-    if (!contextData.text) {
-        throw new Error('No text to translate. Make sure crawl() has been called first.');
-    }
+        // Get context stack
+        const contextData = this.getContextStack({ trim: true, skipEmpty: true });
+        
+        if (!contextData.text) {
+            throw new Error('No text to translate. Make sure crawl() has been called first.');
+        }
 
-    // Prepare configuration
-    const model = options.model || 'claude-sonnet-4-5-20250929';
-    const maxTokens = options.maxTokens || 2000;
-    const temperature = options.temperature || 0.3;
-    const proxyUrl = options.proxyUrl || 'http://localhost:3000/api/translate';
+        // Prepare configuration
+        const model = options.model || 'claude-sonnet-4-5-20250929';
+        const maxTokens = options.maxTokens || 2000;
+        const temperature = options.temperature || 0.3;
+        const proxyUrl = options.proxyUrl || 'http://localhost:3000/api/translate';
 
-    // Determine if we have context or just direct translation
-    const hasContext = contextData.stack && contextData.stack.length > 0;
-    
-    let systemPrompt;
-    let userMessage;
-    
-    if (hasContext) {
-        // Use context-aware translation
-        systemPrompt = options.systemPrompt || this.translationSystemPrompt;
-        userMessage = `Translate the following to ${language}:\n\n${JSON.stringify(contextData, null, 2)}`;
-    } else {
-        // Direct translation without context
-        systemPrompt = options.systemPrompt || `You are a professional translator.
+        // Determine if we have context or just direct translation
+        const hasContext = contextData.stack && contextData.stack.length > 0;
+        
+        let systemPrompt;
+        let userMessage;
+        
+        if (hasContext) {
+            // Use context-aware translation
+            systemPrompt = options.systemPrompt || this.translationSystemPrompt;
+            userMessage = `Translate the following to ${language}:\n\n${JSON.stringify(contextData, null, 2)}`;
+        } else {
+            // Direct translation without context
+            systemPrompt = options.systemPrompt || `You are a professional translator.
 
 Translate the provided text to the target language accurately and naturally.
 
@@ -399,94 +447,94 @@ Return ONLY a valid JSON object with this exact structure:
 }
 
 Do not include any explanation, markdown formatting, or additional text outside the JSON object.`;
-        
-        userMessage = `Translate the following text to ${language}:\n\n"${contextData.text}"`;
-    }
+            
+            userMessage = `Translate the following text to ${language}:\n\n"${contextData.text}"`;
+        }
 
-    // Prepare API request payload
-    const requestBody = {
-        apiKey: options.apiKey,
-        model: model,
-        max_tokens: maxTokens,
-        temperature: temperature,
-        system: systemPrompt,
-        messages: [
-            {
-                role: 'user',
-                content: userMessage
-            }
-        ]
-    };
+        // Prepare API request payload
+        const requestBody = {
+            apiKey: options.apiKey,
+            model: model,
+            max_tokens: maxTokens,
+            temperature: temperature,
+            system: systemPrompt,
+            messages: [
+                {
+                    role: 'user',
+                    content: userMessage
+                }
+            ]
+        };
 
-    this._log('Translation request:', {
-        language,
-        hasContext,
-        contextData,
-        model
-    });
-
-    try {
-        // Make API call through proxy
-        const response = await fetch(proxyUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
+        this._log('Translation request:', {
+            language,
+            hasContext,
+            contextData,
+            model
         });
 
-        // Check response status
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(
-                `API request failed with status ${response.status}: ${
-                    errorData.error?.message || response.statusText
-                }`
-            );
-        }
-
-        // Parse response
-        const data = await response.json();
-        
-        this._log('API response:', data);
-
-        // Extract text from Claude's response
-        if (!data.content || !data.content[0] || !data.content[0].text) {
-            throw new Error('Unexpected API response format');
-        }
-
-        const responseText = data.content[0].text.trim();
-        
-        // Parse JSON response from Claude
-        let translationResult;
         try {
-            translationResult = JSON.parse(responseText);
-        } catch (parseError) {
-            // If JSON parsing fails, try to extract JSON from markdown code blocks
-            const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
-                            responseText.match(/```\s*([\s\S]*?)\s*```/);
-            
-            if (jsonMatch) {
-                translationResult = JSON.parse(jsonMatch[1]);
-            } else {
-                throw new Error(`Failed to parse translation response: ${parseError.message}`);
+            // Make API call through proxy
+            const response = await fetch(proxyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            // Check response status
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(
+                    `API request failed with status ${response.status}: ${
+                        errorData.error?.message || response.statusText
+                    }`
+                );
             }
+
+            // Parse response
+            const data = await response.json();
+            
+            this._log('API response:', data);
+
+            // Extract text from Claude's response
+            if (!data.content || !data.content[0] || !data.content[0].text) {
+                throw new Error('Unexpected API response format');
+            }
+
+            const responseText = data.content[0].text.trim();
+            
+            // Parse JSON response from Claude
+            let translationResult;
+            try {
+                translationResult = JSON.parse(responseText);
+            } catch (parseError) {
+                // If JSON parsing fails, try to extract JSON from markdown code blocks
+                const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                                responseText.match(/```\s*([\s\S]*?)\s*```/);
+                
+                if (jsonMatch) {
+                    translationResult = JSON.parse(jsonMatch[1]);
+                } else {
+                    throw new Error(`Failed to parse translation response: ${parseError.message}`);
+                }
+            }
+
+            // Validate response structure
+            if (!translationResult.translation || !translationResult.language) {
+                throw new Error('Invalid translation response format');
+            }
+
+            this._log('Translation successful:', translationResult);
+
+            return translationResult;
+
+        } catch (error) {
+            this._log('Translation error:', error);
+            throw new Error(`Translation failed: ${error.message}`);
         }
-
-        // Validate response structure
-        if (!translationResult.translation || !translationResult.language) {
-            throw new Error('Invalid translation response format');
-        }
-
-        this._log('Translation successful:', translationResult);
-
-        return translationResult;
-
-    } catch (error) {
-        this._log('Translation error:', error);
-        throw new Error(`Translation failed: ${error.message}`);
     }
-}
 
     /**
      * Batch translate multiple texts using the same context stack

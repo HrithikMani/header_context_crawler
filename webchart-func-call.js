@@ -10,5 +10,19 @@ const texts = crawler.getContextStack();
 console.log(texts);
 
 const result = await crawler.getTranslation('Spanish', {
-    apiKey: 'sk-ant-...'
+    apiKey: 'sk-'
 });
+
+
+// //div[@class="icon"]//following-sibling::label
+
+// //span[@class='dynTitle-text']
+
+// //span[@title="Add translation"]/parent::*
+
+
+/*
+Question to ask Doug:
+are we on the same page ?
+
+*/ 
