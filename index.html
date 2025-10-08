@@ -4,492 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Medical Records - Header Context Crawler Demo</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 0;
-        }
-        
-        .top-bar {
-            background: #2c3e50;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-size: 14px;
-        }
-        
-        .user-info {
-            margin-left: auto;
-        }
-        
-        .patient-header {
-            background: #e74c3c;
-            color: white;
-            padding: 15px 20px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .patient-header span {
-            margin-right: 30px;
-        }
-        
-        .badge {
-            background: white;
-            color: #e74c3c;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .tabs {
-            background: #ecf0f1;
-            padding: 10px 20px;
-            display: flex;
-            gap: 5px;
-            border-bottom: 2px solid #bdc3c7;
-        }
-        
-        .tab {
-            padding: 8px 20px;
-            background: white;
-            border: 1px solid #bdc3c7;
-            cursor: pointer;
-            border-radius: 3px 3px 0 0;
-        }
-        
-        .tab.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            min-height: calc(100vh - 120px);
-        }
-        
-        .content-area {
-            display: flex;
-            height: calc(100vh - 150px);
-        }
-        
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .sidebar {
-            width: 450px;
-            background: #34495e;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            background: #fafafa;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .section.crawling {
-            background: #fff3cd;
-            border-color: #ffc107;
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-        }
-        
-        .section.crawled {
-            background: #d4edda;
-            border-color: #28a745;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #ecf0f1;
-            border-left: 4px solid #3498db;
-        }
-        
-        h1.crawling {
-            background: #fff3cd;
-            border-left-color: #ffc107;
-            animation: highlight 0.5s ease;
-        }
-        
-        h1.crawled {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-        
-        h2 {
-            color: #34495e;
-            font-size: 20px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #3498db;
-        }
-        
-        h2.crawling {
-            border-bottom-color: #ffc107;
-            animation: highlight 0.5s ease;
-        }
-        
-        h2.crawled {
-            border-bottom-color: #28a745;
-        }
-        
-        h3 {
-            color: #555;
-            font-size: 16px;
-            margin: 15px 0 10px 0;
-            padding: 8px;
-            background: #f8f9fa;
-            border-left: 3px solid #6c757d;
-        }
-        
-        h3.crawling {
-            background: #fff3cd;
-            border-left-color: #ffc107;
-            animation: highlight 0.5s ease;
-        }
-        
-        h3.crawled {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-        
-        @keyframes highlight {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        
-        .metadata {
-            background: #e8f4f8;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #555;
-        }
-        
-        .metadata span {
-            display: inline-block;
-            margin-right: 15px;
-            font-weight: bold;
-        }
-        
-        .metadata.crawling {
-            background: #fff3cd;
-            animation: highlight 0.5s ease;
-        }
-        
-        .metadata.crawled {
-            background: #d4edda;
-        }
-        
-        .problem-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .problem-list li {
-            padding: 12px;
-            margin: 8px 0;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .problem-list li:hover {
-            border-color: #3498db;
-            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
-        }
-        
-        .problem-list li.crawling {
-            background: #ffc107;
-            color: #000;
-            transform: scale(1.05);
-        }
-        
-        .config-section {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .config-section h3 {
-            color: #ecf0f1;
-            font-size: 14px;
-            margin-bottom: 10px;
-            background: none;
-            border: none;
-            padding: 0;
-        }
-        
-        .input-group {
-            margin-bottom: 12px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            color: #bdc3c7;
-        }
-        
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #7f8c8d;
-            border-radius: 4px;
-            background: #2c3e50;
-            color: white;
-            font-family: monospace;
-            font-size: 12px;
-        }
-        
-        .input-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            background: #34495e;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-        }
-        
-        .checkbox-group label {
-            margin: 0;
-            font-size: 12px;
-        }
-        
-        .tag-input-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-        
-        .tag {
-            background: #3498db;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .tag .remove {
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .crawl-button {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .crawl-button:hover {
-            background: #229954;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-        }
-        
-        .crawl-button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .results-title {
-            color: #ecf0f1;
-            font-size: 16px;
-            margin: 20px 0 15px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #27ae60;
-        }
-        
-        .result-item {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            margin: 6px 0;
-            border-radius: 4px;
-            border-left: 3px solid #27ae60;
-            font-size: 12px;
-            opacity: 0;
-            animation: slideIn 0.3s ease forwards;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .result-item:hover {
-            background: rgba(255,255,255,0.2);
-            border-left-color: #f39c12;
-            transform: translateX(5px);
-        }
-        
-        .element-highlight {
-            background: #ffd700 !important;
-            border-color: #f39c12 !important;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
-            transform: scale(1.03) !important;
-            transition: all 0.3s ease !important;
-            z-index: 1000;
-            position: relative;
-        }
-        
-        .start-element-marker {
-            background: #ff6b6b !important;
-            border: 3px solid #c0392b !important;
-            box-shadow: 0 0 25px rgba(231, 76, 60, 0.7) !important;
-            position: relative;
-            animation: startPulse 2s ease-in-out infinite;
-        }
-        
-        .start-element-marker::before {
-            content: "START ELEMENT";
-            position: absolute;
-            top: -25px;
-            left: 0;
-            background: #e74c3c;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            z-index: 1001;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        @keyframes startPulse {
-            0%, 100% { 
-                box-shadow: 0 0 25px rgba(231, 76, 60, 0.7);
-            }
-            50% { 
-                box-shadow: 0 0 35px rgba(231, 76, 60, 0.9);
-            }
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .result-tag {
-            color: #27ae60;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
-        .result-text {
-            color: #ecf0f1;
-        }
-        
-        .crawl-stats {
-            background: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 13px;
-        }
-        
-        .crawl-stats div {
-            margin: 4px 0;
-        }
-        
-        .help-text {
-            font-size: 11px;
-            color: #95a5a6;
-            font-style: italic;
-            margin-top: 5px;
-        }
-        
-        .preset-buttons {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .preset-btn {
-            flex: 1;
-            padding: 6px;
-            background: #7f8c8d;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        
-        .preset-btn:hover {
-            background: #95a5a6;
-        }
-        
-        .error-message {
-            background: #e74c3c;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-    </style>
+   <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="top-bar">
@@ -657,6 +172,33 @@
                     <div>Status: <span id="crawlStatus">Ready</span></div>
                 </div>
                 
+                <!-- Translation Section -->
+                <div class="config-section" style="margin-top: 20px;">
+                    <h3>Translation (AI-Powered)</h3>
+                    
+                    <div class="input-group">
+                        <label>Anthropic API Key:</label>
+                        <input type="password" id="apiKey" value="your_api_key_here" placeholder="sk-...">
+                        <div class="help-text">Your API key is never stored or sent anywhere except Anthropic</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Target Language:</label>
+                        <input type="text" id="targetLanguage" value="Spanish" placeholder="Spanish, French, German, etc.">
+                    </div>
+                    
+                    <div style="display: flex; gap: 5px; margin-top: 10px;">
+                        <button class="crawl-button" onclick="translateContext()" id="translateBtn" style="background: #3498db; flex: 1;">
+                            Translate Context
+                        </button>
+                        <button class="crawl-button" onclick="resetTranslation()" id="resetBtn" style="background: #95a5a6; flex: 1; display: none;">
+                            Reset
+                        </button>
+                    </div>
+                    
+                    <div id="translationResult" style="margin-top: 15px;"></div>
+                </div>
+                
                 <h2 class="results-title">Captured Context (Bottom → Top)</h2>
                 <div id="resultsList">
                     <p style="color: #95a5a6; font-style: italic; font-size: 12px;">Configure parameters above and click "Start Visual Crawl"</p>
@@ -669,6 +211,10 @@
     <script src="header-context-crawler.js"></script>
 
     <script>
+        // Store the crawler instance globally for translation
+        let globalCrawler = null;
+        let originalElementText = null;
+
         // Extend the crawl method to support async progress callback for visual effects
         const originalCrawl = HeaderContextCrawler.prototype.crawl;
         HeaderContextCrawler.prototype.crawlWithProgress = async function(onProgress) {
@@ -811,6 +357,14 @@
                     { debug: debugMode }
                 );
                 
+                // Store globally for translation
+                globalCrawler = crawler;
+                
+                // Store original text for reset
+                if (crawler.startElement) {
+                    originalElementText = crawler.startElement.textContent;
+                }
+                
                 // Mark the start element with red background
                 if (crawler.startElement) {
                     crawler.startElement.classList.add('start-element-marker');
@@ -893,12 +447,136 @@
                     console.log(`${i + 1}. <${el.tagName}> ${el.textContent.trim().substring(0, 50)}`);
                 });
                 
+                // Log context stack
+                const contextStack = crawler.getContextStack();
+                console.log('\n=== Context Stack ===');
+                console.log(JSON.stringify(contextStack, null, 2));
+                
             } catch (error) {
                 errorContainer.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
                 console.error('Crawl error:', error);
                 btn.disabled = false;
                 btn.textContent = 'Start Visual Crawl';
                 document.getElementById('crawlStatus').textContent = 'Error';
+            }
+        }
+
+        async function translateContext() {
+            const btn = document.getElementById('translateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const resultDiv = document.getElementById('translationResult');
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const language = document.getElementById('targetLanguage').value.trim();
+            
+            // Clear previous results
+            resultDiv.innerHTML = '';
+            
+            // Validate inputs
+            if (!apiKey) {
+                resultDiv.innerHTML = '<div class="error-message">Please enter your Anthropic API key</div>';
+                return;
+            }
+            
+            if (!language) {
+                resultDiv.innerHTML = '<div class="error-message">Please enter a target language</div>';
+                return;
+            }
+            
+            if (!globalCrawler || globalCrawler.capturedElements.length === 0) {
+                resultDiv.innerHTML = '<div class="error-message">Please run a crawl first before translating</div>';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Translating...';
+            
+            resultDiv.innerHTML = `
+                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                    <div style="font-size: 12px; color: #ecf0f1;">
+                        🔄 Calling Claude API...
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const result = await globalCrawler.getTranslation(language, {
+                    apiKey: apiKey,
+                    model: 'claude-sonnet-4-5-20250929',
+                    maxTokens: 2000,
+                    temperature: 0.3
+                });
+                
+                // Visual update: Animate the element translation
+                const targetElement = globalCrawler.startElement;
+                
+                // Add translation badge
+                targetElement.classList.add('translating');
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Update the text content
+                targetElement.textContent = result.translation;
+                
+                // Add translated class
+                targetElement.classList.remove('translating', 'start-element-marker');
+                targetElement.classList.add('translated');
+                
+                // Scroll to element
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Display result in sidebar
+                resultDiv.innerHTML = `
+                    <div style="background: rgba(46, 204, 113, 0.2); padding: 12px; border-radius: 4px; border-left: 3px solid #2ecc71; margin-top: 10px;">
+                        <div style="font-size: 11px; color: #95a5a6; margin-bottom: 5px;">
+                            <strong>Language:</strong> ${result.language}
+                        </div>
+                        <div style="font-size: 11px; color: #95a5a6; margin-bottom: 8px;">
+                            <strong>Original:</strong><br/>
+                            <span style="color: #bdc3c7;">${originalElementText}</span>
+                        </div>
+                        <div style="font-size: 13px; color: #ecf0f1; line-height: 1.5;">
+                            <strong>Translation:</strong><br/>
+                            ${result.translation}
+                        </div>
+                    </div>
+                `;
+                
+                console.log('=== Translation Result ===');
+                console.log('Original:', originalElementText);
+                console.log('Translation:', result);
+                
+                btn.disabled = false;
+                btn.textContent = 'Translate Context';
+                
+                // Show reset button
+                resetBtn.style.display = 'block';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error-message">Translation failed: ${error.message}</div>`;
+                console.error('Translation error:', error);
+                btn.disabled = false;
+                btn.textContent = 'Translate Context';
+            }
+        }
+
+        function resetTranslation() {
+            if (globalCrawler && globalCrawler.startElement && originalElementText) {
+                // Restore original text
+                globalCrawler.startElement.textContent = originalElementText;
+                
+                // Remove translated class
+                globalCrawler.startElement.classList.remove('translated');
+                globalCrawler.startElement.classList.add('start-element-marker');
+                
+                // Scroll to element
+                globalCrawler.startElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Hide reset button
+                document.getElementById('resetBtn').style.display = 'none';
+                
+                // Clear translation result
+                document.getElementById('translationResult').innerHTML = '';
+                
+                console.log('Translation reset to original text');
             }
         }
 
