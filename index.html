@@ -141,8 +141,7 @@
                         <label>Capture List (XPath selectors, one per line):</label>
                         <textarea id="captureList">//h1
 //h2
-//h3
-//span</textarea>
+//h3</textarea>
                         <div class="help-text">Elements to capture while crawling upward</div>
                     </div>
                     
@@ -280,7 +279,7 @@
             const presets = {
                 default: {
                     xpath: '//*[@id="targetProblem"]',
-                    captures: '//h1\n//h2\n//h3\n//span',
+                    captures: '//h1\n//h2\n//h3',
                     filter: ''
                 },
                 headers: {
@@ -482,10 +481,7 @@
                 return;
             }
             
-            if (!globalCrawler || globalCrawler.capturedElements.length === 0) {
-                resultDiv.innerHTML = '<div class="error-message">Please run a crawl first before translating</div>';
-                return;
-            }
+          
             
             btn.disabled = true;
             btn.textContent = 'Translating...';

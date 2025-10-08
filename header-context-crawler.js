@@ -49,6 +49,7 @@ TRANSLATION GUIDELINES:
 4. Maintain professional medical/technical terminology appropriate for the target language
 5. Preserve any medical codes, IDs, or technical identifiers (e.g., ICD codes like "I50.814")
 6. Keep formatting markers and punctuation appropriate for the target language
+7. Make sure you translate as native as possible sometimes word by word translation might work against natural flow of the target language
 
 OUTPUT FORMAT:
 Return ONLY a valid JSON object with this exact structure:
@@ -331,25 +332,26 @@ Do not include any explanation, markdown formatting, or additional text outside 
         return this.translationSystemPrompt;
     }
 
-    /**
-     * Translate the captured context text to a target language using Claude AI
-     * @param {string} language - Target language (e.g., "Spanish", "French", "German", "es", "fr", "de")
-     * @param {Object} options - Optional configuration
-     * @param {string} options.apiKey - Anthropic API key (required)
-     * @param {string} options.model - Model to use (default: "claude-sonnet-4-5-20250929")
-     * @param {number} options.maxTokens - Max tokens for response (default: 2000)
-     * @param {number} options.temperature - Temperature for response (default: 0.3 for consistency)
-     * @param {string} options.systemPrompt - Custom system prompt (overrides instance prompt for this call only)
-     * @returns {Promise<Object>} Object with {translation: string, language: string}
-     * @throws {Error} If API call fails or API key is missing
-     * 
-     * @example
-     * const crawler = new HeaderContextCrawler('#myElement', ['//h1', '//h2']);
-     * crawler.crawl();
-     * const result = await crawler.getTranslation('Spanish', { apiKey: 'your-api-key' });
-     * console.log(result.translation); // "Empleador:"
-     */
-    async getTranslation(language, options = {}) {
+/**
+ * Translate the captured context text to a target language using Claude AI
+ * @param {string} language - Target language (e.g., "Spanish", "French", "German", "es", "fr", "de")
+ * @param {Object} options - Optional configuration
+ * @param {string} options.apiKey - Anthropic API key (required)
+ * @param {string} options.model - Model to use (default: "claude-sonnet-4-5-20250929")
+ * @param {number} options.maxTokens - Max tokens for response (default: 2000)
+ * @param {number} options.temperature - Temperature for response (default: 0.3 for consistency)
+ * @param {string} options.systemPrompt - Custom system prompt (overrides instance prompt for this call only)
+ * @param {string} options.proxyUrl - Proxy server URL (default: "http://localhost:3000/api/translate")
+ * @returns {Promise<Object>} Object with {translation: string, language: string}
+ * @throws {Error} If API call fails or API key is missing
+ * 
+ * @example
+ * const crawler = new HeaderContextCrawler('#myElement', ['//h1', '//h2']);
+ * crawler.crawl();
+ * const result = await crawler.getTranslation('Spanish', { apiKey: 'your-api-key' });
+ * console.log(result.translation); // "Empleador:"
+ */
+async getTranslation(language, options = {}) {
     // Validate API key
     if (!options.apiKey) {
         throw new Error('API key is required. Pass it in options.apiKey parameter.');
@@ -366,15 +368,44 @@ Do not include any explanation, markdown formatting, or additional text outside 
     const model = options.model || 'claude-sonnet-4-5-20250929';
     const maxTokens = options.maxTokens || 2000;
     const temperature = options.temperature || 0.3;
-    const systemPrompt = options.systemPrompt || this.translationSystemPrompt;
-    const proxyUrl = options.proxyUrl || 'http://localhost:3000/api/translate'; // Add proxy URL
+    const proxyUrl = options.proxyUrl || 'http://localhost:3000/api/translate';
 
-    // Construct the user message
-    const userMessage = `Translate the following to ${language}:\n\n${JSON.stringify(contextData, null, 2)}`;
+    // Determine if we have context or just direct translation
+    const hasContext = contextData.stack && contextData.stack.length > 0;
+    
+    let systemPrompt;
+    let userMessage;
+    
+    if (hasContext) {
+        // Use context-aware translation
+        systemPrompt = options.systemPrompt || this.translationSystemPrompt;
+        userMessage = `Translate the following to ${language}:\n\n${JSON.stringify(contextData, null, 2)}`;
+    } else {
+        // Direct translation without context
+        systemPrompt = options.systemPrompt || `You are a professional translator.
+
+Translate the provided text to the target language accurately and naturally.
+
+For medical or technical terms:
+- Maintain professional terminology
+- Preserve any codes, IDs, or technical identifiers (e.g., ICD codes)
+- Keep formatting and punctuation appropriate for the target language
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object with this exact structure:
+{
+  "translation": "the translated text here",
+  "language": "target language code"
+}
+
+Do not include any explanation, markdown formatting, or additional text outside the JSON object.`;
+        
+        userMessage = `Translate the following text to ${language}:\n\n"${contextData.text}"`;
+    }
 
     // Prepare API request payload
     const requestBody = {
-        apiKey: options.apiKey, // Send API key to proxy
+        apiKey: options.apiKey,
         model: model,
         max_tokens: maxTokens,
         temperature: temperature,
@@ -389,6 +420,7 @@ Do not include any explanation, markdown formatting, or additional text outside 
 
     this._log('Translation request:', {
         language,
+        hasContext,
         contextData,
         model
     });
