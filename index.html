@@ -174,11 +174,12 @@
                 <!-- Translation Section -->
                 <div class="config-section" style="margin-top: 20px;">
                     <h3>Translation (AI-Powered)</h3>
+                    <div class="help-text" style="margin-bottom: 15px; padding: 10px; background: rgba(46, 204, 113, 0.1); border-left: 3px solid #2ecc71; border-radius: 3px;">
+                        🔒 API key is now configured server-side for enhanced security
+                    </div>
                     
-                    <div class="input-group">
-                        <label>Anthropic API Key:</label>
-                        <input type="password" id="apiKey" value="your_api_key_here" placeholder="sk-...">
-                        <div class="help-text">Your API key is never stored or sent anywhere except Anthropic</div>
+                    <div id="serverStatus" style="margin-bottom: 15px; padding: 10px; border-radius: 3px;">
+                        <span id="statusText">🔄 Checking server connection...</span>
                     </div>
                     
                     <div class="input-group">
@@ -213,6 +214,44 @@
         // Store the crawler instance globally for translation
         let globalCrawler = null;
         let originalElementText = null;
+
+        // Check server status on page load
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('serverStatus');
+            const statusText = document.getElementById('statusText');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: 'user', content: 'test' }] })
+                });
+                
+                if (response.status === 500) {
+                    const data = await response.json();
+                    if (data.error && data.error.includes('API key not configured')) {
+                        statusDiv.style.background = 'rgba(230, 126, 34, 0.1)';
+                        statusDiv.style.borderLeft = '3px solid #e67e22';
+                        statusText.innerHTML = '⚠️ Server running but API key not configured. Run: <code>npm run setup</code>';
+                    } else {
+                        statusDiv.style.background = 'rgba(46, 204, 113, 0.1)';
+                        statusDiv.style.borderLeft = '3px solid #2ecc71';
+                        statusText.textContent = '✅ Server running and configured';
+                    }
+                } else {
+                    statusDiv.style.background = 'rgba(46, 204, 113, 0.1)';
+                    statusDiv.style.borderLeft = '3px solid #2ecc71';
+                    statusText.textContent = '✅ Server running and configured';
+                }
+            } catch (error) {
+                statusDiv.style.background = 'rgba(231, 76, 60, 0.1)';
+                statusDiv.style.borderLeft = '3px solid #e74c3c';
+                statusText.innerHTML = '❌ Server not running. Start with: <code>npm start</code>';
+            }
+        }
+
+        // Run server check on page load
+        document.addEventListener('DOMContentLoaded', checkServerStatus);
 
         // Extend the crawl method to support async progress callback for visual effects
         const originalCrawl = HeaderContextCrawler.prototype.crawl;
@@ -464,18 +503,12 @@
             const btn = document.getElementById('translateBtn');
             const resetBtn = document.getElementById('resetBtn');
             const resultDiv = document.getElementById('translationResult');
-            const apiKey = document.getElementById('apiKey').value.trim();
             const language = document.getElementById('targetLanguage').value.trim();
             
             // Clear previous results
             resultDiv.innerHTML = '';
             
             // Validate inputs
-            if (!apiKey) {
-                resultDiv.innerHTML = '<div class="error-message">Please enter your Anthropic API key</div>';
-                return;
-            }
-            
             if (!language) {
                 resultDiv.innerHTML = '<div class="error-message">Please enter a target language</div>';
                 return;
@@ -496,7 +529,6 @@
             
             try {
                 const result = await globalCrawler.getTranslation(language, {
-                    apiKey: apiKey,
                     model: 'claude-sonnet-4-5-20250929',
                     maxTokens: 2000,
                     temperature: 0.3
