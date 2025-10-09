@@ -171,6 +171,18 @@
                     <div>Status: <span id="crawlStatus">Ready</span></div>
                 </div>
                 
+                <!-- Language Selector -->
+                <div class="config-section" style="margin-top: 20px;">
+                    <h3>Language / Idioma</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="preset-btn" onclick="switchLanguage('en')" id="btnEnglish" style="flex: 1;">English</button>
+                        <button class="preset-btn" onclick="switchLanguage('es')" id="btnSpanish" style="flex: 1; background: #27ae60;">Español</button>
+                    </div>
+                    <div id="translationStatus" style="margin-top: 10px; font-size: 11px; color: #95a5a6;">
+                        🔄 Loading translations...
+                    </div>
+                </div>
+                
                 <h2 class="results-title">Captured Context (Bottom → Top)</h2>
                 <div id="resultsList">
                     <p style="color: #95a5a6; font-style: italic; font-size: 12px;">Configure parameters above and click "Start Visual Crawl"</p>
@@ -185,6 +197,177 @@
     <script>
         // Store the crawler instance globally
         let globalCrawler = null;
+        let translations = {};
+        let currentLanguage = 'en';
+
+        // Load translations from server
+        async function loadTranslations(lang) {
+            try {
+                console.log(`Fetching translations for: ${lang}`);
+                const response = await fetch(`/api/translations/${lang}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                translations = await response.json();
+                console.log(`✓ Loaded ${Object.keys(translations).length} translations for ${lang}`);
+                console.log('Sample translations:', Object.entries(translations).slice(0, 3));
+                
+                return translations;
+            } catch (error) {
+                console.error('Error loading translations:', error);
+                document.getElementById('translationStatus').innerHTML = 
+                    '<span style="color: #e74c3c;">❌ Failed to load translations. Is server running?</span>';
+                return {};
+            }
+        }
+
+        // Apply translations to the page (exclude sidebar)
+        function applyTranslations() {
+            if (Object.keys(translations).length === 0) {
+                console.log('No translations loaded');
+                return 0;
+            }
+
+            let count = 0;
+            const areasToTranslate = ['.top-bar', '.patient-header', '.tabs', '.main-content'];
+
+            areasToTranslate.forEach(selector => {
+                const area = document.querySelector(selector);
+                if (area) {
+                    count += translateArea(area);
+                }
+            });
+
+            console.log(`✓ Applied ${count} translations`);
+            return count;
+        }
+
+        // Translate text nodes in an area
+        function translateArea(element) {
+            let count = 0;
+            
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: (node) => {
+                        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+                        if (node.parentElement.tagName === 'SCRIPT' || 
+                            node.parentElement.tagName === 'STYLE') {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                },
+                false
+            );
+
+            let node;
+            while (node = walker.nextNode()) {
+                const originalText = node.textContent.trim();
+                
+                if (translations[originalText]) {
+                    // Store original text for switching back
+                    if (!node.parentElement.hasAttribute('data-original-text')) {
+                        node.parentElement.setAttribute('data-original-text', originalText);
+                    }
+                    
+                    // Replace with translation
+                    const newText = node.textContent.replace(originalText, translations[originalText]);
+                    if (newText !== node.textContent) {
+                        node.textContent = newText;
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
+        // Switch language
+        async function switchLanguage(lang) {
+            console.log(`\n=== Switching to ${lang} ===`);
+            
+            // Update button styles
+            document.getElementById('btnEnglish').style.background = lang === 'en' ? '#27ae60' : '#7f8c8d';
+            document.getElementById('btnSpanish').style.background = lang === 'es' ? '#27ae60' : '#7f8c8d';
+            
+            document.getElementById('translationStatus').innerHTML = 
+                '<span style="color: #3498db;">🔄 Loading translations...</span>';
+
+            // If switching from one language to another, reset first
+            if (currentLanguage !== lang && currentLanguage !== '') {
+                console.log('Resetting previous translations...');
+                resetAllTranslations();
+            }
+
+            // Load translations from database
+            const loadedTranslations = await loadTranslations(lang);
+            
+            if (Object.keys(loadedTranslations).length === 0) {
+                document.getElementById('translationStatus').innerHTML = 
+                    '<span style="color: #e74c3c;">❌ No translations found</span>';
+                return;
+            }
+
+            // Apply translations
+            const count = applyTranslations();
+            currentLanguage = lang;
+            
+            // Update status
+            const langName = lang === 'en' ? 'English' : 'Español';
+            document.getElementById('translationStatus').innerHTML = 
+                `<span style="color: #2ecc71;">✓ ${langName} - ${count} translations applied</span>`;
+            
+            console.log(`✓ Switched to ${langName}`);
+        }
+
+        // Reset all translations to original text
+        function resetAllTranslations() {
+            let resetCount = 0;
+            
+            document.querySelectorAll('[data-original-text]').forEach(el => {
+                // Get the original text from the attribute
+                const originalText = el.getAttribute('data-original-text');
+                
+                // Find all text nodes in this element
+                const walker = document.createTreeWalker(
+                    el,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+                
+                let node;
+                while (node = walker.nextNode()) {
+                    // Only reset the text node that contains translated content
+                    const currentText = node.textContent.trim();
+                    
+                    // Check if this text node was translated
+                    if (currentText && currentText !== originalText) {
+                        // Replace the current text with original
+                        node.textContent = node.textContent.replace(currentText, originalText);
+                        resetCount++;
+                        break; // Only replace once per element
+                    }
+                }
+                
+                // Remove the data attribute
+                el.removeAttribute('data-original-text');
+            });
+
+            console.log(`✓ Reset ${resetCount} elements to original text`);
+            return resetCount;
+        }
+
+        // Initialize - Load English on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded. Initializing with English from database...');
+            loadPreset('default');
+            await switchLanguage('en');
+        });
 
         // Extend the crawl method to support async progress callback for visual effects
         const originalCrawl = HeaderContextCrawler.prototype.crawl;
@@ -426,11 +609,6 @@
                 document.getElementById('crawlStatus').textContent = 'Error';
             }
         }
-
-        // Initialize with default preset
-        window.addEventListener('DOMContentLoaded', () => {
-            loadPreset('default');
-        });
     </script>
 </body>
 </html>
