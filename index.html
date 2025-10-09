@@ -171,34 +171,6 @@
                     <div>Status: <span id="crawlStatus">Ready</span></div>
                 </div>
                 
-                <!-- Translation Section -->
-                <div class="config-section" style="margin-top: 20px;">
-                    <h3>Translation (AI-Powered)</h3>
-                    <div class="help-text" style="margin-bottom: 15px; padding: 10px; background: rgba(46, 204, 113, 0.1); border-left: 3px solid #2ecc71; border-radius: 3px;">
-                        🔒 API key is now configured server-side for enhanced security
-                    </div>
-                    
-                    <div id="serverStatus" style="margin-bottom: 15px; padding: 10px; border-radius: 3px;">
-                        <span id="statusText">🔄 Checking server connection...</span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Target Language:</label>
-                        <input type="text" id="targetLanguage" value="Spanish" placeholder="Spanish, French, German, etc.">
-                    </div>
-                    
-                    <div style="display: flex; gap: 5px; margin-top: 10px;">
-                        <button class="crawl-button" onclick="translateContext()" id="translateBtn" style="background: #3498db; flex: 1;">
-                            Translate Context
-                        </button>
-                        <button class="crawl-button" onclick="resetTranslation()" id="resetBtn" style="background: #95a5a6; flex: 1; display: none;">
-                            Reset
-                        </button>
-                    </div>
-                    
-                    <div id="translationResult" style="margin-top: 15px;"></div>
-                </div>
-                
                 <h2 class="results-title">Captured Context (Bottom → Top)</h2>
                 <div id="resultsList">
                     <p style="color: #95a5a6; font-style: italic; font-size: 12px;">Configure parameters above and click "Start Visual Crawl"</p>
@@ -211,47 +183,8 @@
     <script src="header-context-crawler.js"></script>
 
     <script>
-        // Store the crawler instance globally for translation
+        // Store the crawler instance globally
         let globalCrawler = null;
-        let originalElementText = null;
-
-        // Check server status on page load
-        async function checkServerStatus() {
-            const statusDiv = document.getElementById('serverStatus');
-            const statusText = document.getElementById('statusText');
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/translate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: [{ role: 'user', content: 'test' }] })
-                });
-                
-                if (response.status === 500) {
-                    const data = await response.json();
-                    if (data.error && data.error.includes('API key not configured')) {
-                        statusDiv.style.background = 'rgba(230, 126, 34, 0.1)';
-                        statusDiv.style.borderLeft = '3px solid #e67e22';
-                        statusText.innerHTML = '⚠️ Server running but API key not configured. Run: <code>npm run setup</code>';
-                    } else {
-                        statusDiv.style.background = 'rgba(46, 204, 113, 0.1)';
-                        statusDiv.style.borderLeft = '3px solid #2ecc71';
-                        statusText.textContent = '✅ Server running and configured';
-                    }
-                } else {
-                    statusDiv.style.background = 'rgba(46, 204, 113, 0.1)';
-                    statusDiv.style.borderLeft = '3px solid #2ecc71';
-                    statusText.textContent = '✅ Server running and configured';
-                }
-            } catch (error) {
-                statusDiv.style.background = 'rgba(231, 76, 60, 0.1)';
-                statusDiv.style.borderLeft = '3px solid #e74c3c';
-                statusText.innerHTML = '❌ Server not running. Start with: <code>npm start</code>';
-            }
-        }
-
-        // Run server check on page load
-        document.addEventListener('DOMContentLoaded', checkServerStatus);
 
         // Extend the crawl method to support async progress callback for visual effects
         const originalCrawl = HeaderContextCrawler.prototype.crawl;
@@ -395,13 +328,8 @@
                     { debug: debugMode }
                 );
                 
-                // Store globally for translation
+                // Store globally
                 globalCrawler = crawler;
-                
-                // Store original text for reset
-                if (crawler.startElement) {
-                    originalElementText = crawler.startElement.textContent;
-                }
                 
                 // Mark the start element with red background
                 if (crawler.startElement) {
@@ -496,115 +424,6 @@
                 btn.disabled = false;
                 btn.textContent = 'Start Visual Crawl';
                 document.getElementById('crawlStatus').textContent = 'Error';
-            }
-        }
-
-        async function translateContext() {
-            const btn = document.getElementById('translateBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const resultDiv = document.getElementById('translationResult');
-            const language = document.getElementById('targetLanguage').value.trim();
-            
-            // Clear previous results
-            resultDiv.innerHTML = '';
-            
-            // Validate inputs
-            if (!language) {
-                resultDiv.innerHTML = '<div class="error-message">Please enter a target language</div>';
-                return;
-            }
-            
-          
-            
-            btn.disabled = true;
-            btn.textContent = 'Translating...';
-            
-            resultDiv.innerHTML = `
-                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
-                    <div style="font-size: 12px; color: #ecf0f1;">
-                        🔄 Calling Claude API...
-                    </div>
-                </div>
-            `;
-            
-            try {
-                const result = await globalCrawler.getTranslation(language, {
-                    model: 'claude-sonnet-4-5-20250929',
-                    maxTokens: 2000,
-                    temperature: 0.3
-                });
-                
-                // Visual update: Animate the element translation
-                const targetElement = globalCrawler.startElement;
-                
-                // Add translation badge
-                targetElement.classList.add('translating');
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                // Update the text content
-                targetElement.textContent = result.translation;
-                
-                // Add translated class
-                targetElement.classList.remove('translating', 'start-element-marker');
-                targetElement.classList.add('translated');
-                
-                // Scroll to element
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Display result in sidebar
-                resultDiv.innerHTML = `
-                    <div style="background: rgba(46, 204, 113, 0.2); padding: 12px; border-radius: 4px; border-left: 3px solid #2ecc71; margin-top: 10px;">
-                        <div style="font-size: 11px; color: #95a5a6; margin-bottom: 5px;">
-                            <strong>Language:</strong> ${result.language}
-                        </div>
-                        <div style="font-size: 11px; color: #95a5a6; margin-bottom: 8px;">
-                            <strong>Original:</strong><br/>
-                            <span style="color: #bdc3c7;">${originalElementText}</span>
-                        </div>
-                        <div style="font-size: 13px; color: #ecf0f1; line-height: 1.5;">
-                            <strong>Translation:</strong><br/>
-                            ${result.translation}
-                        </div>
-                    </div>
-                `;
-                
-                console.log('=== Translation Result ===');
-                console.log('Original:', originalElementText);
-                console.log('Translation:', result);
-                
-                btn.disabled = false;
-                btn.textContent = 'Translate Context';
-                
-                // Show reset button
-                resetBtn.style.display = 'block';
-                
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="error-message">Translation failed: ${error.message}</div>`;
-                console.error('Translation error:', error);
-                btn.disabled = false;
-                btn.textContent = 'Translate Context';
-            }
-        }
-
-        function resetTranslation() {
-            if (globalCrawler && globalCrawler.startElement && originalElementText) {
-                // Restore original text
-                globalCrawler.startElement.textContent = originalElementText;
-                
-                // Remove translated class
-                globalCrawler.startElement.classList.remove('translated');
-                globalCrawler.startElement.classList.add('start-element-marker');
-                
-                // Scroll to element
-                globalCrawler.startElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Hide reset button
-                document.getElementById('resetBtn').style.display = 'none';
-                
-                // Clear translation result
-                document.getElementById('translationResult').innerHTML = '';
-                
-                console.log('Translation reset to original text');
             }
         }
 
