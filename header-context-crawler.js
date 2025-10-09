@@ -438,27 +438,21 @@ Do not include any explanation, markdown formatting, or additional text outside 
      * Translate the captured context text to a target language using Claude AI
      * @param {string} language - Target language (e.g., "Spanish", "French", "German", "es", "fr", "de")
      * @param {Object} options - Optional configuration
-     * @param {string} options.apiKey - Anthropic API key (required)
      * @param {string} options.model - Model to use (default: "claude-sonnet-4-5-20250929")
      * @param {number} options.maxTokens - Max tokens for response (default: 2000)
      * @param {number} options.temperature - Temperature for response (default: 0.3 for consistency)
      * @param {string} options.systemPrompt - Custom system prompt (overrides instance prompt for this call only)
      * @param {string} options.proxyUrl - Proxy server URL (default: "http://localhost:3000/api/translate")
      * @returns {Promise<Object>} Object with {translation: string, language: string}
-     * @throws {Error} If API call fails or API key is missing
+     * @throws {Error} If API call fails or server is not configured
      * 
      * @example
      * const crawler = new HeaderContextCrawler('#myElement', ['//h1', '//h2']);
      * crawler.crawl();
-     * const result = await crawler.getTranslation('Spanish', { apiKey: 'your-api-key' });
+     * const result = await crawler.getTranslation('Spanish');
      * console.log(result.translation); // "Empleador:"
      */
     async getTranslation(language, options = {}) {
-        // Validate API key
-        if (!options.apiKey) {
-            throw new Error('API key is required. Pass it in options.apiKey parameter.');
-        }
-
         // Get context stack
         const contextData = this.getContextStack({ trim: true, skipEmpty: true });
         
@@ -507,7 +501,6 @@ Do not include any explanation, markdown formatting, or additional text outside 
 
         // Prepare API request payload
         const requestBody = {
-            apiKey: options.apiKey,
             model: model,
             max_tokens: maxTokens,
             temperature: temperature,
@@ -597,7 +590,7 @@ Do not include any explanation, markdown formatting, or additional text outside 
      * @returns {Promise<Array<Object>>} Array of translation results
      * 
      * @example
-     * const results = await crawler.getTranslations(['Spanish', 'French', 'German'], { apiKey: 'key' });
+     * const results = await crawler.getTranslations(['Spanish', 'French', 'German']);
      * results.forEach(r => console.log(`${r.language}: ${r.translation}`));
      */
     async getTranslations(languages, options = {}) {
