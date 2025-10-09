@@ -9,9 +9,7 @@ console.log(elements);
 const texts = crawler.getContextStack();
 console.log(texts);
 
-const result = await crawler.getTranslation('Spanish', {
-    apiKey: 'sk-'
-});
+const result = await crawler.getTranslation('Spanish');
 
 
 // //div[@class="icon"]//following-sibling::label
