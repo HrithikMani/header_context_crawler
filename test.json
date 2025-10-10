@@ -1,0 +1,367 @@
+[
+    {
+        "element": {},
+        "xpath": "//*[@id=\"wc_sidemenu_height\"]/a[7]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"wc_sidemenu_height\"]/a[9]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"cancel-call\"]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"call-join-now\"]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"wc_alerts\"]/a[1]"
+    },
+    {
+        
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_AdministratorPortlet_Welcome\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"sample-pat\"]/div[2]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"sample-pat\"]/div[2]/p[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"sample-pat\"]/div[2]/p[1]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"sample-pat\"]/div[3]/a[1]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"webchart-store\"]/div[2]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"webchart-store\"]/div[2]/p[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"tele-setup-btn\"]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[3]/div[2]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[3]/div[2]/p[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[3]/div[2]/p[1]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[3]/div[2]/p[1]/strong[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[3]/div[3]/a[1]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"getstartedlink\"]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[3]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[4]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[5]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[4]/div[2]/ul[1]/li[6]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[5]/div[1]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[5]/div[1]/p[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"newsfeed\"]/div[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[6]/div[1]/h1[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"adminwelcomewrap\"]/div[6]/div[1]/p[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"wc_main\"]/p[1]/span[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Portals\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"access-wrapper\"]/span[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Chart_20Search\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]/li[1]/strong[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]/li[2]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]/li[3]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]/li[4]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[1]/ul[1]/li[5]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/label[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/label[3]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"phtxt_display\"]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/label[5]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"patsearch\"]/table[1]/tbody[1]/tr[1]/td[1]/span[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Recent_20Charts\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_lv_recentpats_span\"]/table[1]/tbody[1]/tr[1]/td[6]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_lv_recentpats_span\"]/table[1]/tbody[1]/tr[1]/td[7]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Schedule\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"schedule_div\"]/form[1]/div[1]/div[4]/div[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[3]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[4]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[10]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"myschedulelist_div\"]/table[1]/thead[1]/tr[1]/th[11]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[1]/li[1]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[1]/li[2]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[1]/li[3]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/h3[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/a[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[3]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[4]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[5]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[6]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[7]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[8]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[9]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[10]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[11]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Reporting_20Dashboards\"]/div[1]/div[1]/ul[2]/li[12]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Checkin\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Tasks\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/thead[1]/tr[1]/th[2]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/thead[1]/tr[1]/th[3]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/thead[1]/tr[1]/th[4]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/thead[1]/tr[1]/th[5]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/thead[1]/tr[1]/th[6]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_individual_span\"]/table[1]/tfoot[1]/tr[1]/td[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_WR_20Case_20Management_20Worklist\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_container_User_20Portlet_Super_20User\"]/div[1]/div[1]/label[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"moveable_content_User_20Portlet_Super_20User\"]/div[1]/div[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_auth_super_users_span\"]/table[1]/thead[1]/tr[1]/th[1]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_auth_super_users_span\"]/table[1]/thead[1]/tr[1]/th[2]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_auth_super_users_span\"]/table[1]/thead[1]/tr[1]/th[3]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_auth_super_users_span\"]/table[1]/thead[1]/tr[1]/th[4]/a[1]"
+    },
+    {
+        "element": {},
+        "xpath": "//*[@id=\"lv_auth_super_users_span\"]/table[1]/tfoot[1]/tr[1]/td[1]"
+    }
+]

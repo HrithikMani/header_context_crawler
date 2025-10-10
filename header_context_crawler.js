@@ -252,7 +252,17 @@ class HeaderContextCrawler {
         
         this._log(`Found ${elements.length} bubble elements on the page`);
         
-        return elements;
+        // Return array of objects with element, xpath, langCode, value, and translation
+        return elements.map(el => {
+            const text = el.textContent.trim();
+            return {
+                element: el,
+                xpath: this._getXPathForElement(el),
+                langCode: this._extractLangCode(el),
+                value: text,
+                translation: text  // Initially same as value
+            };
+        });
     }
     
     /**
@@ -291,6 +301,8 @@ class HeaderContextCrawler {
     getContextStack(options = {}) {
         const trim = options.trim !== false;
         const skipEmpty = options.skipEmpty || false;
+        const stringify = options.stringify || false;
+        const delimiter = options.delimiter || ' | ';
         
         // Get start element text
         const startText = this.startElement 
@@ -307,10 +319,16 @@ class HeaderContextCrawler {
             texts = texts.filter(text => text.length > 0);
         }
         
-        return {
+        // Reverse to get top-to-bottom order
+        const stack = texts.reverse();
+        
+        const result = {
             text: startText,
-            stack: texts.reverse() // Reverse to get top-to-bottom order
+            stack: stack,
+            stackAsString: this.stackStringify(stack, delimiter)
         };
+        
+        return result;
     }
 
     /**
@@ -388,9 +406,145 @@ class HeaderContextCrawler {
     getElements() {
         return this.capturedElements;
     }
+    
+    /**
+     * Crawl context for all bubbles on the page
+     * This method finds all bubbles and runs the crawl operation for each one
+     * 
+     * @param {string} bubbleXPath - XPath to find bubbles (default: '//span[@title="Add translation"]/parent::*')
+     * @param {Array<string>} captureList - Array of element selectors to capture (default: ["//h1", "//h2", "//h3", "//h4", "//h5", "//h6"])
+     * @returns {Array<Object>} Array of objects with bubble info and its captured context
+     * 
+     * @example
+     * const crawler = new HeaderContextCrawler();
+     * const results = crawler.crawlAllBubbles();
+     * results.forEach(result => {
+     *     console.log('Bubble:', result.bubble.text);
+     *     console.log('Context stack:', result.context.stack);
+     * });
+     * 
+     * @example
+     * // With custom capture list
+     * const results = crawler.crawlAllBubbles(
+     *     '//span[@title="Add translation"]/parent::*',
+     *     ['//h1', '//h2', '//div[@class="section-title"]']
+     * );
+     */
+    crawlAllBubbles(
+        bubbleXPath = '//span[@title="Add translation"]/parent::*',
+        captureList = ['//h1', '//h2', '//h3', '//h4', '//h5', '//h6']
+    ) {
+        this._log('Starting crawl for all bubbles');
+        this._log('Bubble XPath:', bubbleXPath);
+        this._log('Capture list:', captureList);
+        
+        // Get all bubbles with their XPaths
+        const bubbles = this.getBubbles(bubbleXPath);
+        
+        this._log(`Found ${bubbles.length} bubbles to process`);
+        
+        const results = [];
+        
+        // Loop through each bubble
+        bubbles.forEach((bubble, index) => {
+            this._log(`\nProcessing bubble ${index + 1}/${bubbles.length}`);
+            this._log('Bubble XPath:', bubble.xpath);
+            
+            // Create a new crawler instance for this bubble
+            const bubbleCrawler = new HeaderContextCrawler(
+                bubble.element,
+                captureList,
+                { debug: this.debug }
+            );
+            
+            // Run the crawl
+            const capturedElements = bubbleCrawler.crawl();
+            
+            // Get the context stack
+            const contextStack = bubbleCrawler.getContextStack();
+            
+            // Get metadata for captured elements
+            const elementsMetadata = bubbleCrawler.getElementsWithMetadata();
+            
+            // Store the result
+            results.push({
+                originalText: contextStack.text,
+                textToTranslate: "&" + contextStack.text,
+                context: contextStack.stack,
+                langCode: bubble.langCode,
+                context: contextStack.stackAsString
+            });
+            
+            this._log(`Captured ${capturedElements.length} elements for this bubble`);
+        });
+        
+        this._log(`\nCompleted crawling ${bubbles.length} bubbles`);
+        this._log(`Total results: ${results.length}`);
+        
+        return results;
+    }
+
+    /**
+     * Convert a stack array to a delimited string
+     * @param {Array<string>} stack - Array of strings to join
+     * @param {string} delimiter - Delimiter to use (default: ' | ')
+     * @returns {string} Delimited string representation of the stack
+     * 
+     * @example
+     * const stack = ["Documentation/videos", "Enterprise Health Store", "Sample patient demo"];
+     * const result = crawler.stackStringify(stack);
+     * // Returns: "Documentation/videos | Enterprise Health Store | Sample patient demo"
+     * 
+     * @example
+     * // With custom delimiter
+     * const result = crawler.stackStringify(stack, ' > ');
+     * // Returns: "Documentation/videos > Enterprise Health Store > Sample patient demo"
+     */
+    stackStringify(stack, delimiter = ' | ') {
+        if (!Array.isArray(stack)) {
+            this._log('stackStringify: input is not an array');
+            return '';
+        }
+        
+        return stack.join(delimiter);
+    }
+    
+    /**
+     * Extract language code from a bubble element
+     * @private
+     * @param {Element} element - The bubble element
+     * @returns {string|null} Language code (e.g., 'zh-Hans') or null if not found
+     */
+    _extractLangCode(element) {
+        const span = element.querySelector('span.fa.wc_translate[title="Add translation"]');
+        if (!span) return null;
+        
+        const onclickAttr = span.getAttribute('onclick');
+        if (!onclickAttr) return null;
+        
+        // Extract language code from onclick="wclang.addTransPopup('zh-Hans', ..."
+        const match = onclickAttr.match(/wclang\.addTransPopup\s*\(\s*['"]([^'"]+)['"]/);
+        return match ? match[1] : null;
+    }
 }
 
-// Export for use in modules (optional)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HeaderContextCrawler;
+
+function sendAjaxPost(bubble) {
+    // Build the object
+    var o = {
+        'lang_code': bubble.langCode,
+        'context': bubble.context,
+        'value': bubble.originalText,
+        'trans': bubble.textToTranslate
+    };
+    
+    fetch('https://zeus.med-web.com/webchart/wcthkonda/webchart.cgi', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: o
+    })
+    .then(response => console.log(response.text()))
 }
+
